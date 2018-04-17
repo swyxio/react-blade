@@ -27,14 +27,7 @@ var handler = {
   }
 };
 
-var tophandler = {
-  get: function(obj, prop, receiver) {
-    const newTrace = `${obj.__trace}.${prop}`;
-    return prop in obj ? obj[prop] : makeNewProxy(newTrace);
-  }
-};
-
-const query = new Proxy({ __trace: "topquery" }, tophandler);
+const query = new Proxy({ __trace: "topquery" }, handler);
 
 // use this if you want control over your own placeholder
 
@@ -63,3 +56,39 @@ export function Connect(props) {
     </Timeout>
   );
 }
+
+function debounce(fn, ms = 500) {
+  let timeout;
+
+  return event => {
+    clearTimeout(timeout);
+    event.persist();
+    timeout = setTimeout(() => {
+      fn(event);
+    }, ms);
+  };
+}
+
+// function Delay({ms}) {
+//   return (
+//     <Timeout ms={ms}>
+//       {didTimeout => {
+//         if (didTimeout) {
+//           // Once ms has elapsed, render null. This allows the rest of the
+//           // tree to resume rendering.
+//           return null;
+//         }
+//         return <Never />;
+//       }}
+//     </Timeout>
+//   );
+// }
+
+// function DebouncedText({text, ms}) {
+//   return (
+//     <Fragment>
+//       <Delay ms={ms} />
+//       <Text text={text} />
+//     </Fragment>
+//   );
+// }

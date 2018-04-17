@@ -6,9 +6,7 @@ export default ({ name }) => {
     <Connect>
       {({ query }) => (
         // this is a graphql query; doesn't render til its ready
-        <h1>
-          Hello2 {name}! {query.bunny.read()}
-        </h1>
+        <h1>Hello {query.user.name.read()}</h1>
       )}
     </Connect>
   );

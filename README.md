@@ -217,6 +217,35 @@ class MyComponent extends React.Component {
 }
 ```
 
+---
+
+## Development
+
+Local development is broken into two parts.
+
+First, we run rollup to watch the `src/` module and automatically recompile it into `dist/` whenever you make changes.
+
+```bash
+npm start # runs rollup with watch flag
+```
+
+The second part will be running the `example/` create-react-app that's linked to the local version of your module.
+
+```bash
+# (in another tab)
+cd example
+npm link react-blade # optional if using yarn
+npm start # runs create-react-app dev server
+```
+
+Now, anytime you make a change to your component in `src/` or to the example app's `example/src`, `create-react-app` will live-reload your local dev server so you can iterate on your component in real-time.
+
+![](https://media.giphy.com/media/12NUbkX6p4xOO4/giphy.gif)
+
+Note: if you're using yarn, there is no need to use `yarn link`, as the generated module's example includes a local-link by default.
+
+---
+
 ## Prior Art
 
 ### urql
@@ -226,6 +255,10 @@ This library wouldn't be possible without [urql](<(https://github.com/Formidable
 ### HowToGraphQL/GraphCool
 
 I learned GraphQL on the lap of Nick Burke's extensive [HowToGraphQL.com](http://HowToGraphQL.com) tutorial and even [made my own tutorial](http://graphql-of-thrones.herokuapp.com) as a capstone project.
+
+### create-react-library
+
+This library was made with <https://github.com/transitive-bullshit/create-react-library>. It's amazing.
 
 ## License
 
