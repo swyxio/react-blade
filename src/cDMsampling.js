@@ -1,23 +1,9 @@
-// sample every 10 milliseconds to generate the query
 // this one works but its janky and i don't really like it
 
 import React, { Timeout } from "react";
-import parseBuffer from "./parseBuffer";
 const cache = new Map();
 const buffer = new Set();
 
-function noopProxy() {
-  return new Proxy(
-    {
-      __trace: "monkey",
-      read() {
-        throw new Promise(resolve => resolve());
-      },
-      map() {}
-    },
-    handler
-  );
-}
 function makeNewProxy(newTrace) {
   return new Proxy(
     {
@@ -33,9 +19,6 @@ function makeNewProxy(newTrace) {
           resolve();
         });
         return "you shouldnt see this";
-      },
-      map(callback) {
-        callback(makeNewProxy(newTrace));
       }
     },
     handler
@@ -44,18 +27,12 @@ function makeNewProxy(newTrace) {
 
 var handler = {
   get: function(obj, prop, receiver) {
-    // console.log("prop", typeof prop, prop, "obj.trace", obj.__trace);
-    // console.log("cache", cache, "buffer", buffer);
-    // if (!isString(prop)) return console.log("propprop", prop) || null;
-    // if (!isString(prop)) return noopProxy();
-    if (typeof prop === "symbol" || prop in Object.prototype) return obj[prop];
-    console.log("prop", typeof prop, prop, "obj.trace", obj.__trace);
-    const newTrace = obj.__trace === "" ? `${prop}` : `${obj.__trace}.${prop}`;
+    const newTrace = `${obj.__trace}.${prop}`;
     return prop in obj ? obj[prop] : makeNewProxy(newTrace);
   }
 };
 
-const query = new Proxy({ __trace: "" }, handler);
+const query = new Proxy({ __trace: "topquery" }, handler);
 
 // use this if you want control over your own placeholder
 
@@ -63,15 +40,20 @@ const query = new Proxy({ __trace: "" }, handler);
  * @class ConnectWithoutPlaceholder
  */
 export class ConnectWithoutPlaceholder extends React.Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log("scu");
+  }
+  getSnapshotBeforeUpdate() {
+    console.log("gsbu");
+  }
+  componentDidUpdate(prevProps, prevState) {
+    console.log("buffer", buffer);
+  }
   componentDidMount() {
-    setTimeout(() => {
-      console.log("sldkjsl", buffer);
-      if (buffer.size) {
-        const graphqlQuery = parseBuffer(buffer);
-        console.log("graphqlQuery", graphqlQuery);
-        this.forceUpdate();
-      }
-    }, 500);
+    setTimeout(
+      () => buffer.size && console.log("sldkjsl", buffer) && this.forceUpdate(),
+      100
+    );
   }
   render() {
     return <React.Fragment>{this.props.children({ query })}</React.Fragment>;
@@ -95,9 +77,4 @@ export function Connect(props) {
       }
     </Timeout>
   );
-}
-
-// https://stackoverflow.com/questions/4059147/check-if-a-variable-is-a-string-in-javascript
-function isString(x) {
-  return Object.prototype.toString.call(x) === "[object String]";
 }
