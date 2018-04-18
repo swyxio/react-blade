@@ -44,19 +44,26 @@ const Home = () => (
       query.todos = ["id", "text"];
       return (
         <div>
-          <TodoList todos={query.todos} />
+          <TodoList todos={query.todos.read()} />
         </div>
       );
     }}
   </Connect>
 );
 ```
+## In short:
+
+- Solve the Double Declaration problem in GraphQL
+- Reduce indirection in GraphQL Query Variables
+- Query-as-you-consume
+- No tripups from curly braces
+- = **massive win in DX**
 
 **How this works**: `query` is actually wrapped with ES6 Proxies that throw a Promise wrapping a graphql query when asked for properties it does not have. Once it resolves, React Suspense's behavior is to rerender and the query succeeds as it is stored in cache.
 
 ---
 
-# API Walkthrough
+# Full API Walkthrough
 
 ## Setting up the Provider
 
@@ -91,7 +98,7 @@ const Home = () => (
       query.todos = ["id", "text"]; // setting subfields that we also want in our response
       return (
         <div>
-          <TodoList todos={query.todos} />
+          <TodoList todos={query.todos.read()} />
         </div>
       );
     }}
@@ -99,7 +106,13 @@ const Home = () => (
 );
 ```
 
-Because of our usage of React Suspense, the fetched data is normalized in our cache "for free" based on our usage. Here's an example of a query with multiple fields:
+Generated GraphQL:
+
+```graphql
+{ todos }
+```
+
+Note we use `.read()` for now until we figure out how to inject a tail throw within the last Proxy. Because of our usage of React Suspense, the fetched data is normalized in our cache "for free" based on our usage. Here's an example of a query with multiple fields:
 
 ```js
 // Blade-style query with multiple fields
@@ -108,13 +121,19 @@ const Home = () => (
     {({ query }) => {
       return (
         <>
-          <h3>{query.user.name}</h3>
-          <TodoList todos={query.todos} />
+          <h3>{query.user.name.read()}</h3>
+          <TodoList todos={query.todos.read()} />
         </>
       );
     }}
   </Connect>
 );
+```
+
+Generated GraphQL:
+
+```graphql
+{ user { name }, todos }
 ```
 
 React suspends twice and the cache stores both `query.user` and `query.todos` separately. In the future we will have batching algorithms to execute suspenders in parallel.
@@ -145,7 +164,7 @@ const Home = () => (
   <Connect>
     {({ query }) => {
       query.getTodoByText = {text: 'Todo Text Content'}
-      return <TodoItem todo={query.getTodoByText} />
+      return <TodoItem todo={query.getTodoByText.read()} />
       );
     }}
   </Connect>

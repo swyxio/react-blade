@@ -5,7 +5,7 @@ import React, { Timeout } from "react";
 import parseBuffer from "./parseBuffer";
 const cache = new Map();
 const buffer = new Set();
-
+let loopcount = 0;
 function makeNewProxy(newTrace) {
   return new Proxy(
     {
@@ -13,13 +13,12 @@ function makeNewProxy(newTrace) {
       read() {
         if (cache.has(newTrace)) return cache.get(newTrace);
         if (buffer.has(newTrace)) return "loading";
-        // console.log("codetrace 1");
-        // console.log("codetrace 2");
-        throw new Promise(resolve => {
-          // console.log("codetrace 3");
-          buffer.add(newTrace);
-          resolve();
-        });
+        if (loopcount++ < 20) {
+          throw new Promise(resolve => {
+            buffer.add(newTrace);
+            resolve();
+          });
+        }
         return "you shouldnt see this";
       },
       map(callback) {
@@ -31,15 +30,25 @@ function makeNewProxy(newTrace) {
 }
 
 var handler = {
-  get: function(obj, prop, receiver) {
+  get: function (obj, prop, receiver) {
     // console.log("prop", typeof prop, prop, "obj.trace", obj.__trace);
     // console.log("cache", cache, "buffer", buffer);
-    // if (!isString(prop)) return console.log("propprop", prop) || null;
-    // if (!isString(prop)) return noopProxy();
     if (typeof prop === "symbol" || prop in Object.prototype) return obj[prop];
-    // console.log("prop", typeof prop, prop, "obj.trace", obj.__trace);
     const newTrace = obj.__trace === "" ? `${prop}` : `${obj.__trace}.${prop}`;
     return prop in obj ? obj[prop] : makeNewProxy(newTrace);
+  },
+  set: function (obj, prop, value, receiver) {
+    console.log("prop", typeof prop, prop, "obj.trace", obj.__trace);
+    console.log("cache", cache, "buffer", buffer);
+    if (Array.isArray(value)) {
+      // query children
+      obj.__trace = obj.__trace + `.${prop} {${value.toString()}}`
+    } else {
+      // query variable
+      const qv = Object.entries(value).map(([k, v]) => `${k}: ${v}`).join(',')
+      obj.__trace = obj.__trace + `${prop}(${qv})`
+    }
+    return true
   }
 };
 
@@ -51,7 +60,6 @@ export class ConnectWithoutPlaceholder extends React.Component {
     // i really dont want to have to make this setInterval.
     // with some user restrictions i wont have to
     setTimeout(() => {
-      // console.log("sldkjsl", buffer);
       if (buffer.size) {
         const graphqlQuery = parseBuffer(buffer);
         console.log("graphqlQuery", graphqlQuery);
