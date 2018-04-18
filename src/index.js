@@ -6,18 +6,6 @@ import parseBuffer from "./parseBuffer";
 const cache = new Map();
 const buffer = new Set();
 
-function noopProxy() {
-  return new Proxy(
-    {
-      __trace: "monkey",
-      read() {
-        throw new Promise(resolve => resolve());
-      },
-      map() {}
-    },
-    handler
-  );
-}
 function makeNewProxy(newTrace) {
   return new Proxy(
     {
@@ -25,10 +13,10 @@ function makeNewProxy(newTrace) {
       read() {
         if (cache.has(newTrace)) return cache.get(newTrace);
         if (buffer.has(newTrace)) return "loading";
-        console.log("codetrace 1");
-        console.log("codetrace 2");
+        // console.log("codetrace 1");
+        // console.log("codetrace 2");
         throw new Promise(resolve => {
-          console.log("codetrace 3");
+          // console.log("codetrace 3");
           buffer.add(newTrace);
           resolve();
         });
@@ -49,7 +37,7 @@ var handler = {
     // if (!isString(prop)) return console.log("propprop", prop) || null;
     // if (!isString(prop)) return noopProxy();
     if (typeof prop === "symbol" || prop in Object.prototype) return obj[prop];
-    console.log("prop", typeof prop, prop, "obj.trace", obj.__trace);
+    // console.log("prop", typeof prop, prop, "obj.trace", obj.__trace);
     const newTrace = obj.__trace === "" ? `${prop}` : `${obj.__trace}.${prop}`;
     return prop in obj ? obj[prop] : makeNewProxy(newTrace);
   }
@@ -58,14 +46,12 @@ var handler = {
 const query = new Proxy({ __trace: "" }, handler);
 
 // use this if you want control over your own placeholder
-
-/**
- * @class ConnectWithoutPlaceholder
- */
 export class ConnectWithoutPlaceholder extends React.Component {
   componentDidMount() {
+    // i really dont want to have to make this setInterval.
+    // with some user restrictions i wont have to
     setTimeout(() => {
-      console.log("sldkjsl", buffer);
+      // console.log("sldkjsl", buffer);
       if (buffer.size) {
         const graphqlQuery = parseBuffer(buffer);
         console.log("graphqlQuery", graphqlQuery);
@@ -78,10 +64,12 @@ export class ConnectWithoutPlaceholder extends React.Component {
   }
 }
 
-// we choose to wrap this as default because
+// we choose to wrap ConnectWithoutPlaceholder as default because
 // it is easy to mess up the placeholder placement
 // and get a difficult-to-solve error:
 // "Uncaught Error: A synchronous update was suspended, but no fallback UI was provided."
+// Understand that picking one or the other as default behavior will make someone unhappy
+// and we rather make beginners' life a tiny bit easier
 export function Connect(props) {
   const {
     delayMs = 500,
@@ -95,9 +83,4 @@ export function Connect(props) {
       }
     </Timeout>
   );
-}
-
-// https://stackoverflow.com/questions/4059147/check-if-a-variable-is-a-string-in-javascript
-function isString(x) {
-  return Object.prototype.toString.call(x) === "[object String]";
 }
