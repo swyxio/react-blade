@@ -260,7 +260,7 @@ Note: if you're using yarn, there is no need to use `yarn link`, as the generate
 
 ### urql
 
-This library wouldn't be possible without [urql](<(https://github.com/FormidableLabs/urql)>). Ken Wheeler and Team Formidable are an inspiration to us all. Specifically, watching Ken mess up repeatedly during a live coding session demonstrating Urql gave me the original inspiration for solving the double declaration problem. Enormous amounts of inspiration for this lib came from urql and its architecture.
+This library wouldn't be possible without [urql](<(https://github.com/FormidableLabs/urql)>). Ken Wheeler and Team Formidable are an inspiration to us all. Specifically, watching Ken trip up on minor GraphQL template string syntax during a live coding session demonstrating Urql finally made me realize that there is a double declaration problem, which soon led to this solution for fixing it. As for GraphQL lib architecture, enormous amounts of inspiration for this lib came from urql and its architecture.
 
 ### HowToGraphQL/GraphCool
 
