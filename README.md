@@ -268,6 +268,15 @@ I learned GraphQL on the lap of Nick Burke's extensive [HowToGraphQL.com](http:/
 
 This library was made with <https://github.com/transitive-bullshit/create-react-library>. It's amazing.
 
+### Metaprogramming resources
+
+Messing around with Proxies like this can be uncomfortable for some. (It was for me). Here are some resources to help
+
+- [Brendan Eich: Proxies are Awesome!](https://www.youtube.com/watch?v=sClk6aB_CPk)
+- [How bad is MetaProgramming still today](https://www.youtube.com/watch?v=EkdfiHs78DY)
+- <https://www.quora.com/What-practical-tricks-can-you-do-with-metaprogramming>
+- <https://stackoverflow.com/questions/3468246/whats-the-use-of-metaprogramming>
+
 ## License
 
 MIT © [swyx](https://twitter.com/swyx)
