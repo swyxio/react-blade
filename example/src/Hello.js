@@ -44,17 +44,54 @@ import { Connect } from "react-blade";
 //   );
 // };
 
-// query children demo
+// // query subtree demo
+// export default ({ name }) => {
+//   return (
+//     <Connect>
+//       {({ query }) => {
+//         query.todos.subtree({ id: null, text: null });
+//         query.todos.abc.subtree({ foo: null, bar: null });
+//         return <div>
+//           <h1>Hello {query.todos.read()}</h1>
+//           <h1>Hello {query.todos.abc.read()}</h1>
+//           <h1>Hello {query.todos.abc.def.read()}</h1>
+//         </div>
+//       }
+//       }
+//     </Connect>
+//   );
+// };
+
+
+
+// // query variables demo
+// export default ({ name }) => {
+//   return (
+//     <Connect>
+//       {({ query }) => {
+//         query.todos.vars({ id: 23, text: 'four' });
+//         query.todos.subtree({ id: null, text: null });
+//         console.log('*****')
+//         return <div>
+//           <h1>Hello {query.todos.read()}</h1>
+//         </div>
+//       }
+//       }
+//     </Connect>
+//   );
+// };
+
+
+// query variables demo
 export default ({ name }) => {
   return (
     <Connect>
       {({ query }) => {
-        query.todos = ["id", "text"];
-        return <div>
-          <h1>Hello {query.todos.read()}</h1>
-        </div>
-      }
-      }
+        query.getTodoByText.subtree({ id: null, text: null });
+        query.getTodoByText.vars({ text: 'Todo1' })
+        return <h3>{query.getTodoByText.read()}</h3>
+          ;
+      }}
     </Connect>
   );
 };

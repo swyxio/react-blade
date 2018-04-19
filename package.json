@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2"
+    "lodash.set": "^4.3.2",
+    "lodash.unset": "^4.5.2"
   },
   "peerDependencies": {
     "react": "^16.4.0-alpha.0911da3",

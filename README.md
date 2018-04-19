@@ -93,50 +93,32 @@ export const App = () => (
 import { Connect } from "blade";
 // Blade-style query with subfields that aren't directly used
 const Home = () => (
-  <Connect>
-    {({ query }) => {
-      query.todos = ["id", "text"]; // setting subfields that we also want in our response
-      return (
-        <div>
-          <TodoList todos={query.todos.read()} />
+    <Connect>
+      {({ query }) => {
+        // setting subfields that we also want in our response but dont explicitly request
+        query.todos.subtree({ id: null, text: null });
+        query.todos.abc.subtree({ foo: null, bar: null });
+        // getting data as we like
+        return <div>
+          <h1>Hello {query.todos.read()}</h1>
+          <h1>Hello {query.todos.abc.read()}</h1>
+          <h1>Hello {query.todos.abc.def.read()}</h1>
         </div>
-      );
-    }}
-  </Connect>
+      }
+      }
+    </Connect>
 );
 ```
 
 Generated GraphQL:
 
 ```graphql
-{ todos }
+{ todos { id, text, abc { foo, bar, def }}}
 ```
 
-Note we use `.read()` for now until we figure out how to inject a tail throw within the last Proxy. Because of our usage of React Suspense, the fetched data is normalized in our cache "for free" based on our usage. Here's an example of a query with multiple fields:
+Note we use `.read()` and `.subtree` for now until we figure out how to inject a tail throw within the last Proxy. Because of our usage of React Suspense, the fetched data is normalized in our cache "for free" based on our usage.
 
-```js
-// Blade-style query with multiple fields
-const Home = () => (
-  <Connect>
-    {({ query }) => {
-      return (
-        <>
-          <h3>{query.user.name.read()}</h3>
-          <TodoList todos={query.todos.read()} />
-        </>
-      );
-    }}
-  </Connect>
-);
-```
-
-Generated GraphQL:
-
-```graphql
-{ user { name }, todos }
-```
-
-React suspends twice and the cache stores both `query.user` and `query.todos` separately. In the future we will have batching algorithms to execute suspenders in parallel.
+In this example, React suspends repeatedly and we build up our GraphQL query in a buffer. We send the GraphQL query once the buffer is complete, and the query populates our cache which then resolves all the suspenders.
 
 ## Query Variables
 
@@ -161,16 +143,25 @@ We can do better. In Blade, you can supply query variables inline without having
 ```js
 // Blade-style inline graphql query variable
 const Home = () => (
-  <Connect>
-    {({ query }) => {
-      query.getTodoByText = {text: 'Todo Text Content'}
-      return <TodoItem todo={query.getTodoByText.read()} />
-      );
-    }}
-  </Connect>
+    <Connect>
+      {({ query }) => {
+        query.getTodoByText.subtree({ id: null, text: null });
+        query.getTodoByText.vars({ text: 'Todo1' })
+        return <h3>{query.getTodoByText.read()}</h3>
+          ;
+      }}
+    </Connect>
 );
 ```
 
+Generated GraphQL:
+
+```graphql
+{ getTodoByText(text: Todo1) { id, text }}
+```
+
+---
+# EVERY THING BELOW HERE DOESN'T EXIST YET!
 ## Mutations
 
 Mutations take pretty much the same format. Here's a GraphQL mutation:

@@ -4,9 +4,7 @@
 import React, { Timeout } from "react";
 import parseBuffer from "./parseBuffer";
 const cache = new Map();
-let buffer = [];
-let buffer_sub = new Map(); // requesting subtrees of the node
-let buffer_vars = new Map(); // query variables for the node
+let buffer = []; // [{trace, children, variables}]. tried using Set but needed Array methods.
 let loopcount = 0;
 function makeNewProxy(newTrace, obj) {
   return new Proxy(
@@ -15,31 +13,16 @@ function makeNewProxy(newTrace, obj) {
       read() {
         console.log("getcache", cache, "buffer", buffer, 'newTrace', newTrace);
         if (cache.has(newTrace)) return cache.get(newTrace);
-        if (buffer.includes(newTrace)) return "loading";
+        if (buffer.find(el => el.trace === newTrace) + 1) return "loading";
         if (loopcount++ < 20) {
           throw new Promise(resolve => {
             console.log('obj.__children', obj.__children, 'obj.__variables', obj.__variables, 'newTrace', newTrace)
-            buffer.push(newTrace);
-            resolve();
-          });
-        }
-        return "you shouldnt see this";
-      },
-      subtree(children) {
-        if (buffer_sub.has(newTrace)) return "loading";
-        if (loopcount++ < 20) {
-          throw new Promise(resolve => {
-            buffer_sub.set(newTrace, children);
-            resolve();
-          });
-        }
-        return "you shouldnt see this";
-      },
-      vars(vars) {
-        if (buffer_vars.has(newTrace)) return "loading";
-        if (loopcount++ < 20) {
-          throw new Promise(resolve => {
-            buffer_vars.set(newTrace, vars);
+            const addition = {
+              trace: newTrace,
+              children: obj.__children,
+              variables: obj.__variables
+            }
+            buffer.push(addition);
             resolve();
           });
         }
@@ -60,6 +43,24 @@ var handler = {
     if (typeof prop === "symbol" || prop in Object.prototype || prop.slice(0, 2) === '__') return obj[prop];
     const newTrace = obj.__trace === "" ? `${prop}` : `${obj.__trace}.${prop}`;
     return prop in obj ? obj[prop] : makeNewProxy(newTrace, obj);
+  },
+  set: function (obj, prop, value, receiver) {
+    if (buffer.find(el => el.trace === obj.__trace) + 1) return true;
+    console.log("setprop", typeof prop, prop, "|obj.trace", obj.__trace);
+    console.log("____value", value, "obj", obj);
+    if (Array.isArray(value)) {
+      // query children
+      obj.__children = value
+    } else {
+      // query variable
+      obj.__variables = value
+    }
+    if (loopcount++ < 200) {
+      return true
+    } else {
+      throw new Error('terminatettete')
+      return false
+    }
   }
 };
 
@@ -75,10 +76,10 @@ export class ConnectWithoutPlaceholder extends React.Component {
     // with some user restrictions i wont have to
     setTimeout(() => {
       if (buffer.length) {
-        console.log("buffer", buffer, 'buffer_sub', buffer_sub);
-        const graphqlQuery = parseBuffer(buffer, buffer_sub, buffer_vars);
+        console.log("buffer", buffer);
+        const graphqlQuery = parseBuffer(buffer);
         // buffer = [] // buffer.clear()
-        console.log("🔥🔥🔥🔥🔥graphqlQuery", graphqlQuery);
+        console.log("graphqlQuery", graphqlQuery);
         this.forceUpdate();
       }
     }, 500);
