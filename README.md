@@ -2,7 +2,7 @@
 
 > Inline GraphQL for the age of Suspense
 
-[![NPM](https://img.shields.io/npm/v/react-blade.svg)](https://www.npmjs.com/package/react-blade) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![NPM](https://img.shields.io/badge/npm-react--blade-green.svg)](https://www.npmjs.com/package/react-blade) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 Caution: This library is still being made. None of the below actually exists yet, this is just documentation-driven development.
 
@@ -104,8 +104,7 @@ const Home = () => (
           <h1>Hello {query.todos.abc.read()}</h1>
           <h1>Hello {query.todos.abc.def.read()}</h1>
         </div>
-      }
-      }
+      }}
     </Connect>
 );
 ```
@@ -148,7 +147,6 @@ const Home = () => (
         query.getTodoByText.subtree({ id: null, text: null });
         query.getTodoByText.vars({ text: 'Todo1' })
         return <h3>{query.getTodoByText.read()}</h3>
-          ;
       }}
     </Connect>
 );
