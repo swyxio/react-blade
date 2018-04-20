@@ -4,11 +4,21 @@
 
 [![NPM](https://img.shields.io/badge/npm-react--blade-green.svg)](https://www.npmjs.com/package/react-blade) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-Caution: This library is still being made. None of the below actually exists yet, this is just documentation-driven development.
+This is an experimental API for generating graphql queries as they are used, at runtime, using React's new Suspense feature. It is not meant to be performant, and it uses ES6 Proxies (not supported by IE10), but it is a cool exercise in metaprogramming that could give you an inspiration for creatively using React Suspense or ES6 Proxies.
 
-## Why another GraphQL client?
+## In short:
 
-All GraphQL client API's to date have a **double declaration problem**. Here's a sample adapted from [the urql example](https://github.com/FormidableLabs/urql/blob/6f9fa91dc2e003fba8bef1ce152f4029ed5f5726/example/src/app/home.tsx):
+- Solve the Double Declaration problem in GraphQL
+- Reduce indirection in GraphQL Query Variables
+- Query-as-you-consume
+- No tripups from curly braces
+- = **massive win in DX**
+
+<details>
+
+<summary>Why another GraphQL client?</summary>
+
+ All GraphQL client API's to date have a **double declaration problem**. Here's a sample adapted from [the urql example](https://github.com/FormidableLabs/urql/blob/6f9fa91dc2e003fba8bef1ce152f4029ed5f5726/example/src/app/home.tsx):
 
 ```js
 const Home = () => (
@@ -41,7 +51,7 @@ Here's the proposed Blade API:
 const Home = () => (
   <Connect>
     {({ query }) => {
-      query.todos = ["id", "text"];
+      query.todos.subtree({ id: null, text: null });
       return (
         <div>
           <TodoList todos={query.todos.read()} />
@@ -51,15 +61,22 @@ const Home = () => (
   </Connect>
 );
 ```
-## In short:
 
-- Solve the Double Declaration problem in GraphQL
-- Reduce indirection in GraphQL Query Variables
-- Query-as-you-consume
-- No tripups from curly braces
-- = **massive win in DX**
+This generates the same GraphQL query as above.
 
-**How this works**: `query` is actually wrapped with ES6 Proxies that throw a Promise wrapping a graphql query when asked for properties it does not have. Once it resolves, React Suspense's behavior is to rerender and the query succeeds as it is stored in cache.
+</details>
+
+<details>
+
+<summary>How This Works</summary>
+
+ `query` is actually a meta-object wrapped with ES6 Proxies that throw a Promise wrapping a graphql query when asked for properties it does not have. Once it resolves, React Suspense's behavior is to rerender and the query succeeds as it is stored in cache. So `query` has a different behavior at read time (building the GraphQL query) than at render time (showing the cache's result after the query has resolved).
+
+ You might ask - why use Proxies? Can't we all do this with a Babel plugin at compile time?
+
+ You could totally write a [babel-plugin-macro](https://github.com/kentcdodds/babel-plugin-macros/blob/master/ot) for simple queries. But you don't always know the properties you are going to access at compile time. For more on why runtime Metaprogramming can be useful, see [our Metaprogramming resources below](#metaprogramming-resources).
+
+</details>
 
 ---
 
@@ -70,7 +87,7 @@ const Home = () => (
 Blade's provider API is exactly the same as urql. But since Blade relies on React Suspense to work, to use Blade at all you must be in React's new AsyncMode.
 
 ```js
-import React, { AsyncMode } from "react";
+import React, { AsyncMode } from "react"; // in react 16.3 and below this is shipped as unstable_AsyncMode
 import { Provider, Client } from "react-blade";
 import Home from "./home";
 
