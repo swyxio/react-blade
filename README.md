@@ -4,7 +4,7 @@
 
 [![NPM](https://img.shields.io/badge/npm-react--blade-green.svg)](https://www.npmjs.com/package/react-blade) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-This is an experimental API for generating graphql queries as they are used, at runtime, using React's new Suspense feature. It is not meant to be performant, and it uses ES6 Proxies (not supported by IE10), but it is a cool exercise in metaprogramming that could give you an inspiration for creatively using React Suspense or ES6 Proxies.
+This is an experimental API for generating graphql queries as they are used, at runtime, using React's new Suspense feature. It is not meant to be performant, and it uses ES6 Proxies (not supported by IE), but it is a cool exercise in metaprogramming that could give you an inspiration for creatively using React Suspense or ES6 Proxies.
 
 ## In short:
 
@@ -290,9 +290,13 @@ This library was made with <https://github.com/transitive-bullshit/create-react-
 Messing around with Proxies like this can be uncomfortable for some. (It was for me). Here are some resources to help
 
 - [Brendan Eich: Proxies are Awesome!](https://www.youtube.com/watch?v=sClk6aB_CPk)
+- [Axel Rauschmeyer on Proxies](http://exploringjs.com/es6/ch_proxies.html)
+- [Pony Foo on Proxies](https://ponyfoo.com/books/practical-modern-javascript/chapters/6#read)
 - [How bad is MetaProgramming still today](https://www.youtube.com/watch?v=EkdfiHs78DY)
 - <https://www.quora.com/What-practical-tricks-can-you-do-with-metaprogramming>
 - <https://stackoverflow.com/questions/3468246/whats-the-use-of-metaprogramming>
+- [@pshihn/windtalk](https://github.com/pshihn/windtalk/blob/master/index.js) and [@pshihn/workly](https://github.com/pshihn/workly) which are nice libraries that make use of proxies - in particular windtalk has forwarding chainable proxies.
+- [react-easy-state](https://github.com/solkimicreb/react-easy-state) another major use of proxies in react
 
 ## License
 
