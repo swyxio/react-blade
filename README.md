@@ -172,7 +172,7 @@ const Home = () => (
 Generated GraphQL:
 
 ```graphql
-{ getTodoByText(text: Todo1) { id, text }}
+{ getTodoByText(text: "Todo1") { id, text }}
 ```
 
 ---
