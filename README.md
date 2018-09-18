@@ -1,3 +1,7 @@
+## this package is no longer maintained - please see the reimplementation, called `babel-blade`, here: https://babel-blade.netlify.com/
+
+---
+
 # React-Blade
 
 > Inline GraphQL for the age of Suspense
